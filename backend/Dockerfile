@@ -1,4 +1,4 @@
-# Portfolio author: Razeen Abdun Nafi
+# Author: Razeen Abdun Nafi
 # Date: 2026-11-22
 # File: Dockerfile
 # Description: Builds and packages the Spring Boot service for a non-root Java runtime.
