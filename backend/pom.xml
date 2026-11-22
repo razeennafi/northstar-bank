@@ -15,7 +15,7 @@
         <!-- The parent coordinates compatible versions across the Spring stack. -->
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.10</version>
+        <version>4.2.0</version>
         <relativePath/>
     </parent>
     <groupId>com.northstar</groupId>
