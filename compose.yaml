@@ -1,0 +1,62 @@
+# Portfolio author: Razeen Abdun Nafi
+# Date: 2026-11-22
+# File: compose.yaml
+# Description: Runs and connects the frontend, backend, and persistent database.
+# Project version: 0.1.0
+
+name: northstar-bank
+
+services:
+  db:
+    image: postgres:17.12-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-northstar}
+      POSTGRES_USER: ${POSTGRES_USER:-northstar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      # The named volume preserves PostgreSQL data when the container is replaced.
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      # Compose DNS resolves db to the database container on the project network.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-northstar}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-northstar}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      # Compose publishes loopback HTTP for the local simulation.
+      BANK_SECURE_COOKIES: "false"
+      BANK_DEMO_FUNDING_ENABLED: ${BANK_DEMO_FUNDING_ENABLED:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/actuator/health/readiness"]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      # Check the browser-facing route all the way through to PostgreSQL.
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/actuator/health/readiness"]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+
+volumes:
+  database:

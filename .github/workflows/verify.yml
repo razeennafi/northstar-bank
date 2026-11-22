@@ -1,0 +1,109 @@
+# Portfolio author: Razeen Abdun Nafi
+# Date: 2026-11-22
+# File: verify.yml
+# Description: Runs build, security, and browser checks on GitHub Actions.
+# Project version: 0.1.0
+
+name: Verify Northstar
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Runs backend and frontend checks independently before starting the full browser stack.
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build and test with PostgreSQL
+        run: mvn -B -ntp -f backend/pom.xml verify
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  browser:
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BANK_DEMO_FUNDING_ENABLED: 'true'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install browser test dependencies
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Configure isolated database
+        run: |
+          database_password="$(openssl rand -hex 24)"
+          echo "::add-mask::$database_password"
+          echo "POSTGRES_PASSWORD=$database_password" >> "$GITHUB_ENV"
+      - name: Start application
+        run: |
+          docker compose config --quiet
+          docker compose up --build --wait --wait-timeout 120
+          node scripts/smoke.mjs
+      - name: Run Chromium end to end
+        working-directory: frontend
+        run: npm run e2e
+      - name: Upload failed browser traces
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: browser-test-results
+          path: frontend/test-results
+          if-no-files-found: ignore
+      - name: Stop isolated CI stack
+        if: always()
+        run: docker compose down
+
+  dependency-review:
+    if: github.event_name == 'pull_request' && !github.event.repository.private
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: high

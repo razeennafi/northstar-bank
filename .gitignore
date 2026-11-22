@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+/.tools/
+**/node_modules/
+**/target/
+**/dist/
+**/coverage/
+**/playwright-report/
+**/test-results/
+*.log
+.idea/
+.vscode/
+.DS_Store
+# Keep local credentials, installed tools, and generated build or test output out of Git.

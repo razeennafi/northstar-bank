@@ -1,0 +1,3 @@
+target
+*.log
+# Build the application from source inside Docker and exclude host build output.

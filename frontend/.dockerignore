@@ -1,0 +1,6 @@
+node_modules
+dist
+coverage
+.env*
+*.log
+# Install dependencies inside the image and keep local output out of its build context.

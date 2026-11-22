@@ -1,0 +1,27 @@
+# Portfolio author: Razeen Abdun Nafi
+# Date: 2026-11-22
+# File: dependabot.yml
+# Description: Schedules updates for application and build dependencies.
+# Project version: 0.1.0
+
+version: 2
+# Checks dependency manifests in each project directory on a weekly schedule.
+updates:
+  - package-ecosystem: maven
+    directory: /backend
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directories:
+      - /backend
+      - /frontend
+    schedule:
+      interval: weekly

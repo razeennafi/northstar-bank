@@ -1,0 +1,11 @@
+# Portfolio author: Razeen Abdun Nafi
+# Date: 2026-11-22
+# File: compose.dev.yaml
+# Description: Exposes PostgreSQL on loopback for local development.
+# Project version: 0.1.0
+
+# Adds a loopback database port for running Spring Boot directly on the host.
+services:
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"
