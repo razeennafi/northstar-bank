@@ -1,5 +1,5 @@
 /*
- * Portfolio author: Razeen Abdun Nafi
+ * Author: Razeen Abdun Nafi
  * Date: 2026-11-22
  * File: BankingIT.java
  * Description: Tests committed banking workflows, concurrency, recovery, and database constraints.
