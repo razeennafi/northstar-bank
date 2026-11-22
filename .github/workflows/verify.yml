@@ -87,7 +87,7 @@ jobs:
         run: npm run e2e
       - name: Upload failed browser traces
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: browser-test-results
           path: frontend/test-results
