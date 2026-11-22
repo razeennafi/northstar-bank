@@ -1,5 +1,5 @@
 /*
- * Portfolio author: Razeen Abdun Nafi
+ * Author: Razeen Abdun Nafi
  * Date: 2026-11-22
  * File: StatementServiceTest.java
  * Description: Tests statement date boundaries and spreadsheet-safe CSV escaping.
