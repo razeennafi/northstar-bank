@@ -13,7 +13,7 @@ COPY src src
 RUN mvn -B -ntp package
 
 # The runtime needs only Java and the packaged application.
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:24-jre-alpine
 RUN addgroup -S northstar && adduser -S -G northstar northstar
 WORKDIR /app
 COPY --from=build --chown=northstar:northstar /build/target/northstar-banking.jar app.jar
